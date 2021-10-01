@@ -2,28 +2,25 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
- 
-//Variables
+
+// Variables
 int i = 0;
 int statusCode;
 const char* ssid = "text";
 const char* passphrase = "text";
 String st;
 String content;
- 
- 
+
 //Function Declaration
 bool testWifi(void);
 void launchWeb(void);
 void setupAP(void);
- 
+
 //--------Establishing Local server at port 80 whenever required
 ESP8266WebServer server(80);
- 
-void setup()
-{
- 
-  Serial.begin(115200); //Initializing if(DEBUG)Serial Monitor
+
+void setup() {
+  Serial.begin(115200);
   Serial.println();
   Serial.println("Disconnecting previously connected WiFi");
   WiFi.disconnect();
@@ -33,20 +30,19 @@ void setup()
   Serial.println();
   Serial.println();
   Serial.println("Startup");
- 
+
   // Read eeprom for ssid and password
   Serial.println("Reading EEPROM ssid");
- 
+
   String esid;
-  for (int i = 0; i < 32; ++i)
-  {
+  for (int i = 0; i < 32; ++i) {
     esid += char(EEPROM.read(i));
   }
   Serial.println();
   Serial.print("SSID: ");
   Serial.println(esid);
   Serial.println("Reading EEPROM pass");
- 
+
   String epass = "";
   for (int i = 32; i < 96; ++i)
   {
@@ -54,49 +50,39 @@ void setup()
   }
   Serial.print("PASS: ");
   Serial.println(epass);
- 
- 
+
   WiFi.begin(esid.c_str(), epass.c_str());
-  if (testWifi())
-  {
+  if (testWifi()) {
     Serial.println("Succesfully Connected!!!");
     return;
-  }
-  else
-  {
+  } else {
     Serial.println("Turning the HotSpot On");
     launchWeb();
     setupAP();// Setup accesspoint or HotSpot
   }
- 
+
   Serial.println();
   Serial.println("Waiting.");
-  
-  while ((WiFi.status() != WL_CONNECTED))
-  {
+
+  while ((WiFi.status() != WL_CONNECTED)) {
     Serial.print(".");
     delay(100);
     server.handleClient();
   }
- 
 }
+
+/**
+ *
+ */
 void loop() {
-  if ((WiFi.status() == WL_CONNECTED))
-  {
- 
+  if ((WiFi.status() == WL_CONNECTED)) {
     // Add your program code here which the esp8266 has to perform when it connects to network
- 
+  } else {
   }
-  else
-  {
-  }
- 
 }
- 
- 
-//Functions used for saving WiFi credentials and to connect to it which you do not need to change 
-bool testWifi(void)
-{
+
+//Functions used for saving WiFi credentials and to connect to it which you do not need to change
+bool testWifi(void) {
   int c = 0;
   Serial.println("Waiting for WiFi to connect");
   while ( c < 20 ) {
@@ -112,9 +98,8 @@ bool testWifi(void)
   Serial.println("Connection timed out, opening AP or Hotspot");
   return false;
 }
- 
-void launchWeb()
-{
+
+void launchWeb() {
   Serial.println("");
   if (WiFi.status() == WL_CONNECTED)
     Serial.println("WiFi connected");
@@ -127,7 +112,7 @@ void launchWeb()
   server.begin();
   Serial.println("Server started");
 }
- 
+
 void setupAP(void)
 {
   WiFi.mode(WIFI_STA);
@@ -141,8 +126,7 @@ void setupAP(void)
   {
     Serial.print(n);
     Serial.println(" Networks found");
-    for (int i = 0; i < n; ++i)
-    {
+    for (int i = 0; i < n; ++i) {
       // Print SSID and RSSI for each network found
       Serial.print(i + 1);
       Serial.print(": ");
@@ -163,7 +147,7 @@ void setupAP(void)
     st += WiFi.SSID(i);
     st += " (";
     st += WiFi.RSSI(i);
- 
+
     st += ")";
     st += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
     st += "</li>";
@@ -175,32 +159,29 @@ void setupAP(void)
   launchWeb();
   Serial.println("over");
 }
- 
-void createWebServer()
-{
- {
+
+void createWebServer() {
     server.on("/", []() {
- 
-      IPAddress ip = WiFi.softAPIP();
-      String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-      content = "<!DOCTYPE HTML>\r\n<html>ESP8266 WiFi Connectivity Setup ";
-      content += "<form action=\"/scan\" method=\"POST\"><input type=\"submit\" value=\"scan\"></form>";
-      content += ipStr;
-      content += "<p>";
-      content += st;
-      content += "</p><form method='get' action='setting'><label>SSID: </label><input name='ssid' length=32><input name='pass' length=64><input type='submit'></form>";
-      content += "</html>";
-      server.send(200, "text/html", content);
+        IPAddress ip = WiFi.softAPIP();
+        String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
+        content = "<!DOCTYPE HTML>\r\n<html>ESP8266 WiFi Connectivity Setup ";
+        content += "<form action=\"/scan\" method=\"POST\"><input type=\"submit\" value=\"scan\"></form>";
+        content += ipStr;
+        content += "<p>";
+        content += st;
+        content += "</p><form method='get' action='setting'><label>SSID: </label><input name='ssid' length=32><input name='pass' length=64><input type='submit'></form>";
+        content += "</html>";
+        server.send(200, "text/html", content);
     });
     server.on("/scan", []() {
       //setupAP();
       IPAddress ip = WiFi.softAPIP();
       String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
- 
+
       content = "<!DOCTYPE HTML>\r\n<html>go back";
       server.send(200, "text/html", content);
     });
- 
+
     server.on("/setting", []() {
       String qsid = server.arg("ssid");
       String qpass = server.arg("pass");
@@ -213,7 +194,7 @@ void createWebServer()
         Serial.println("");
         Serial.println(qpass);
         Serial.println("");
- 
+
         Serial.println("writing eeprom ssid:");
         for (int i = 0; i < qsid.length(); ++i)
         {
@@ -229,7 +210,7 @@ void createWebServer()
           Serial.println(qpass[i]);
         }
         EEPROM.commit();
- 
+
         content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
         statusCode = 200;
         ESP.reset();
@@ -240,7 +221,6 @@ void createWebServer()
       }
       server.sendHeader("Access-Control-Allow-Origin", "*");
       server.send(statusCode, "application/json", content);
- 
+
     });
-  } 
 }
