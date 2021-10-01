@@ -164,14 +164,8 @@ void createWebServer() {
     server.on("/", []() {
         IPAddress ip = WiFi.softAPIP();
         String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-        content = "<!DOCTYPE HTML>\r\n<html>ESP8266 WiFi Connectivity Setup ";
-        content += "<form action=\"/scan\" method=\"POST\"><input type=\"submit\" value=\"scan\"></form>";
-        content += ipStr;
-        content += "<p>";
-        content += st;
-        content += "</p><form method='get' action='setting'><label>SSID: </label><input name='ssid' length=32><input name='pass' length=64><input type='submit'></form>";
-        content += "</html>";
-        server.send(200, "text/html", content);
+        configHtmlContent = "";
+        server.send(200, "text/html", configHtmlContent);
     });
     server.on("/scan", []() {
       //setupAP();
