@@ -10,6 +10,7 @@ install: add-boards-manager install-board
 
 add-dialout-group:
 	@sudo usermod -a -G dialout francesco
+	@echo "Restart PC is required."
 
 install-board:
 	$(ARDUINO) --install-boards esp8266:esp8266
