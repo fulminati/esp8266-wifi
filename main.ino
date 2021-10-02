@@ -3,9 +3,7 @@
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 
-int i = 0;
 int statusCode;
-String st;
 String configNetworksOptions;
 String content;
 
@@ -16,21 +14,21 @@ void setupAP(void);
 ESP8266WebServer webServer(80);
 
 /**
- *
+ * Application bootstrap.
  */
 void appSetup(void) {
     Serial.println("[App] Setup...");
 }
 
 /**
- *
+ * Application runtime loop.
  */
 void appLoop(void) {
     Serial.println("[App] Loop...");
 }
 
 /**
- *
+ * System bootstrap.
  */
 void setup(void) {
     Serial.begin(115200);
@@ -68,7 +66,7 @@ void setup(void) {
 }
 
 /**
- *
+ * System main loop.
  */
 void loop() {
     if ((WiFi.status() == WL_CONNECTED)) {
@@ -115,15 +113,15 @@ void launchWeb(void) {
  *
  */
 void setupAP(void) {
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(100);
-  configScanNetworks();
-  delay(100);
-  WiFi.softAP("ESP8266-WiFi", "");
-  Serial.println("Initializing_Wifi_accesspoint");
-  launchWeb();
-  Serial.println("over");
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    configScanNetworks();
+    delay(100);
+    WiFi.softAP("ESP8266-WiFi", "");
+    Serial.println("Initializing_Wifi_accesspoint");
+    launchWeb();
+    Serial.println("over");
 }
 
 void configWebServerRegisterRoutes() {
