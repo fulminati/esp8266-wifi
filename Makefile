@@ -32,7 +32,11 @@ flash: nodemcu.bin
 
 inject:
 	mkdir -p $(CWD)/build/inject
-	python3 -m jsmin app/config.js > config.js
+	CONFIG_JS_CONTENT="$$(python3 -m jsmin app/config.js)" \
+	CONFIG_CSS_CONTENT="aa" \
+	CONFIG_HTML_CONTENT="$$(envsubst app/config.html)" \
+	sed -i "s/configHtmlContent = .*$$/$${CONFIG_HTML_CONTENT}/" main.ino
+
 
 
 build:
