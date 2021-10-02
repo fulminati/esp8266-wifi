@@ -6,10 +6,10 @@ BM_PREF := boardsmanager.additional.urls
 PACKAGE_JSON := http://arduino.esp8266.com/stable/package_esp8266com_index.json
 PORT := /dev/ttyUSB0
 
-install: add-boards-manager install-board
+install: requirements add-boards-manager install-board
 	@echo "Installed"
 
-setup: requirements.txt
+requirements: requirements.txt
 	@pip install -r requirements.txt
 
 check-port:
