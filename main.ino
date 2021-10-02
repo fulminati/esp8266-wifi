@@ -58,7 +58,7 @@ void setup(void) {
     Serial.println("Turning on the config HotSpot.");
     configWebServerRegisterRoutes();
     webServer.begin();
-    setupAP();
+    configSetupHotSpot();
     while ((WiFi.status() != WL_CONNECTED)) {
         delay(100);
         webServer.handleClient();
@@ -68,7 +68,7 @@ void setup(void) {
 /**
  * System main loop.
  */
-void loop() {
+void loop(void) {
     if ((WiFi.status() == WL_CONNECTED)) {
         appLoop();
     }
@@ -112,30 +112,32 @@ void launchWeb(void) {
 /**
  *
  */
-void setupAP(void) {
+void configSetupHotSpot(void) {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     delay(100);
     configScanNetworks();
     delay(100);
     WiFi.softAP("ESP8266-WiFi", "");
-    Serial.println("Initializing_Wifi_accesspoint");
     launchWeb();
-    Serial.println("over");
 }
 
-void configWebServerRegisterRoutes() {
+/**
+ *
+ */
+void configWebServerRegisterRoutes(void) {
     webServer.on("/", []() {
         IPAddress ip = WiFi.softAPIP();
         String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-        String configHtmlContent = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}</style><body><h1>esp8266-wifi</h1><div id=page></div><script>let d=document;let p=p=>fetch(p).then(async resp=>d.getElementById('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e);}},false);p('login');e('click','login',e=>{console.log('event',e);})</script></body></html>";
-        webServer.send(200, "text/html", configHtmlContent);
+        String configIndexHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}</style><body><h1>esp8266-wifi</h1><div id=page></div><script>let d=document;let p=p=>fetch(p).then(async resp=>d.getElementById('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e);}},false);p('login');e('click','login',e=>{console.log('event',e);})</script></body></html>";
+        webServer.send(200, "text/html", configIndexHtml);
+    });
+    webServer.on("/config", []() {
+        webServer.send(200, "text/html", configFrom());
     });
     webServer.on("/scan", []() {
-        IPAddress ip = WiFi.softAPIP();
-        String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-        content = "<!DOCTYPE HTML>\r\n<html>go back";
-        webServer.send(200, "text/html", content);
+        configScanNetworks();
+        webServer.send(200, "text/html", configFrom());
     });
     webServer.on("/connect", []() {
         int statusCode;
@@ -197,6 +199,14 @@ void configScanNetworks(void) {
             st += "</option>";
         }
     }
+}
+
+/**
+ *
+ */
+String configForm(void) {
+    String configFromHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}</style><body><h1>esp8266-wifi</h1><div id=page></div><script>let d=document;let p=p=>fetch(p).then(async resp=>d.getElementById('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e);}},false);p('login');e('click','login',e=>{console.log('event',e);})</script></body></html>";
+    return configFromHtml;
 }
 
 /**
