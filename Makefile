@@ -30,14 +30,15 @@ nodemcu.bin:
 flash: nodemcu.bin
 	@esptool --port /dev/ttyUSB0 write_flash 0x00000 $(CWD)/nodemcu.bin
 
+inject: export CONFIG_JS_CONTENT = $(shell python3 -m jsmin app/config.js | sed 's/"/\\"/g')
+inject: export CONFIG_CSS_CONTENT = $(shell python3 -m csscompressor app/config.css | sed 's/"/\\"/g')
+inject: export CONFIG_HTML_CONTENT = $(shell htmlmin -s app/config.html | sed 's/"/\\"/g')
+
 inject:
-	mkdir -p $(CWD)/build/inject
-	CONFIG_JS_CONTENT="$$(python3 -m jsmin app/config.js)" \
-	CONFIG_CSS_CONTENT="aa" \
-	CONFIG_HTML_CONTENT="$$(envsubst app/config.html)" \
-	sed -i "s/configHtmlContent = .*$$/$${CONFIG_HTML_CONTENT}/" main.ino
-
-
+	@mkdir -p $(CWD)/build/inject
+	@sed 's/configHtmlContent =.*$$/configHtmlContent = "$$${A}{CONFIG_HTML_CONTENT}";/' main.ino > main.ino.tmp
+	@envsubst < main.ino.tmp | envsubst > main.ino
+	@rm main.ino.tmp
 
 build:
 	mkdir -p $(CWD)/build

@@ -1,2 +1,4 @@
 esptool
 jsmin
+csscompressor
+htmlmin
