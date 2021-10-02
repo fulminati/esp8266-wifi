@@ -1,24 +1,4 @@
-* {
-    background: #222;
-    border: none;
-    color: #fff;
-    font: 18px monospace;
-}
-
-html {
-    margin: 0 auto;
-    max-width: 480px;
-}
-
-input, input:focus,
-select, select:focus,
-button, button:focus,
-textarea, textarea:focus {
-    outline: none;
-    width: 100%;
-    background: #000;
-    padding: 8px;
-    margin: 0 0 16px 0;
-    box-sizing: border-box;
-    cursor: pointer;
+h1 {
+    font-size: 30px;
+    text-align: center;
 }
