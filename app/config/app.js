@@ -1,8 +1,15 @@
 
-p('connect');
+p('config').then(() => {
+
+
+});
 
 e('click', 'connect', e => {
-    console.log('event', e);
+    o('show')
+    p('connect').then(() => {
+
+        o('hide')
+    });
 })
 
 e('click', 'test', e => {
