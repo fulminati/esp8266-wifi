@@ -6,6 +6,7 @@
 int i = 0;
 int statusCode;
 String st;
+String configNetworksOptions;
 String content;
 
 bool testWifi(void);
@@ -166,18 +167,19 @@ void configWebServerRegisterRoutes() {
 }
 
 /**
- *
+ * Scan networks and prepare the list for the login form.
  */
 void configScanNetworks(void) {
     int countNetworks = WiFi.scanNetworks();
-    Serial.println("Scan completed");
+    Serial.println("Networks scan completed.");
     if (countNetworks == 0) {
         Serial.println("No WiFi Networks found");
-        st = "No";
+        configNetworksOptions = "<option value=0>No networks found.</option>";
+        configNetworksOptions += "<option value=0>No networks found.</option>";
     } else {
         Serial.print(countNetworks);
         Serial.println(" Networks found");
-        st = "<ol>";
+        configNetworksOptions = "<option value=0>Select a network</option>";
         for (int i = 0; i < countNetworks; ++i) {
             // Print SSID and RSSI for each network found
             Serial.print(i + 1);
@@ -188,20 +190,19 @@ void configScanNetworks(void) {
             Serial.print(")");
             Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
             delay(10);
-            st += "<li>";
+            st += "<option value=\"" + WiFi.SSID(i) + "\">";
             st += WiFi.SSID(i);
             st += " (";
             st += WiFi.RSSI(i);
             st += ")";
             st += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
-            st += "</li>";
+            st += "</option>";
         }
-        st += "</ol>";
     }
 }
 
 /**
- *
+ * Read data from EEPROM.
  */
 String dataReadAsString(int from, int to) {
     String data = "";
@@ -212,7 +213,7 @@ String dataReadAsString(int from, int to) {
 }
 
 /**
- *
+ * Store data on EEPROM.
  */
 void dataSaveAsString(int offset, String value) {
     for (int i = 0; i < value.length(); ++i) {
@@ -221,7 +222,7 @@ void dataSaveAsString(int offset, String value) {
 }
 
 /**
- *
+ * Erase EEPROM segment.
  */
 void dataErase(int from, int to) {
     for (int i = from; i < to; ++i) {
@@ -230,7 +231,7 @@ void dataErase(int from, int to) {
 }
 
 /**
- *
+ * Commit data on EEPROM.
  */
 void dataCommit(void) {
     EEPROM.commit();

@@ -31,9 +31,9 @@ nodemcu.bin:
 flash: nodemcu.bin
 	@esptool --port /dev/ttyUSB0 write_flash 0x00000 $(CWD)/nodemcu.bin
 
-inject: export CONFIG_JS_CONTENT = $(shell python3 -m jsmin app/config/index.js | sed 's/"/\\"/g')
-inject: export CONFIG_CSS_CONTENT = $(shell python3 -m csscompressor app/config/config.css | sed 's/"/\\"/g')
-inject: export CONFIG_HTML_CONTENT = $(shell htmlmin -s app/config/config.html | sed 's/"/\\"/g')
+inject: export CONFIG_JS_CONTENT = $(shell python3 -m jsmin app/config/index.js | make -s escape)
+inject: export CONFIG_CSS_CONTENT = $(shell python3 -m csscompressor app/config/config.css | make -s escape)
+inject: export CONFIG_HTML_CONTENT = $(shell htmlmin -s app/config/config.html | make -s escape)
 
 inject:
 	@sed 's/configHtmlContent =.*$$/configHtmlContent = "$$${A}{CONFIG_HTML_CONTENT}";/' main.ino > main.ino.tmp
@@ -45,3 +45,6 @@ build:
 
 upload: check-port build
 	$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port /dev/ttyUSB0 --pref build.path=$(CWD)/build/upload
+
+escape:
+	sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
