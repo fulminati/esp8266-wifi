@@ -174,8 +174,8 @@ void configScanNetworks(void) {
     Serial.println("Networks scan completed.");
     if (countNetworks == 0) {
         Serial.println("No WiFi Networks found");
-        configNetworksOptions = "<option value=0>No networks found.</option>";
-        configNetworksOptions += "<option value=0>No networks found.</option>";
+        configNetworksOptions = "<option value=0>No networks found</option>";
+        configNetworksOptions += "<option value=-1>Scan for networks</option>";
     } else {
         Serial.print(countNetworks);
         Serial.println(" Networks found");
