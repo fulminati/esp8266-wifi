@@ -1,8 +1,6 @@
 
-
-
-p('login');
+p('login')
 
 e('click', 'login', e => {
-    console.log('event', e);
+    console.log('event', e)
 })
