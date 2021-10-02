@@ -1,4 +1,8 @@
-{
-
-
-}
+<form>
+    SSID<select>
+    <option value="a">a</option>
+    <option value="b">b</option>
+</select>
+    Password<input type="password">
+    <button id="login" type="button">Save</button>
+</form>
