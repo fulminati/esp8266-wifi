@@ -1,6 +1,26 @@
 
-p('login')
+p('config')
 
-e('click', 'login', e => {
-    console.log('event', e)
+e('click', 'connect', e => {
+    o('show')
+    p('connect', 'config').then(() => {
+        o('hide')
+        //setTimeout(()=> {r('welcome')}, 3000)
+    });
+})
+
+e('change', 'network', e => {
+    if (e.value == -1) {
+        o('show')
+        p('scan').then(() => {
+            o('hide')
+        });
+    }
+})
+
+e('click', 'test', e => {
+    o('show')
+    setTimeout(() => {
+        o('hide')
+    }, 3000)
 })

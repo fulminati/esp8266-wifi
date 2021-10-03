@@ -3,216 +3,251 @@
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 
-// Variables
-int i = 0;
-int statusCode;
-const char* ssid = "text";
-const char* passphrase = "text";
-String st;
-String content;
+const String appTitle = "ESP8266 WiFi";
 
-//Function Declaration
-bool testWifi(void);
-void launchWeb(void);
-void setupAP(void);
+String configErrorMessage;
+String configNetworksOptions;
 
-//--------Establishing Local server at port 80 whenever required
-ESP8266WebServer server(80);
+ESP8266WebServer webServer(80);
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
-  Serial.println("Disconnecting previously connected WiFi");
-  WiFi.disconnect();
-  EEPROM.begin(512); //Initializing EEPROM
-  delay(10);
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.println();
-  Serial.println();
-  Serial.println("Startup");
+/**
+ * Application bootstrap.
+ */
+void appSetup(void) {
+    Serial.println("[App] Setup...");
+}
 
-  // Read eeprom for ssid and password
-  Serial.println("Reading EEPROM ssid");
+/**
+ * Application runtime loop.
+ */
+void appLoop(void) {
+    Serial.println("[App] Loop...");
+}
 
-  String esid;
-  for (int i = 0; i < 32; ++i) {
-    esid += char(EEPROM.read(i));
-  }
-  Serial.println();
-  Serial.print("SSID: ");
-  Serial.println(esid);
-  Serial.println("Reading EEPROM pass");
+/**
+ * System bootstrap.
+ */
+void setup(void) {
+    Serial.begin(115200);
+    pinMode(LED_BUILTIN, OUTPUT);
 
-  String epass = "";
-  for (int i = 32; i < 96; ++i)
-  {
-    epass += char(EEPROM.read(i));
-  }
-  Serial.print("PASS: ");
-  Serial.println(epass);
+    Serial.println("Disconnecting previously connected WiFi");
+    WiFi.disconnect();
 
-  WiFi.begin(esid.c_str(), epass.c_str());
-  if (testWifi()) {
-    Serial.println("Succesfully Connected!!!");
-    return;
-  } else {
-    Serial.println("Turning the HotSpot On");
-    launchWeb();
-    setupAP();// Setup accesspoint or HotSpot
-  }
+    Serial.println("Reading SSID and passphrase from EEPROM");
+    EEPROM.begin(512);
+    delay(10);
+    String ssid = dataReadAsString(0, 32);
+    String passphrase = dataReadAsString(32, 96);
+    Serial.println("- SSID: " + ssid);
+    Serial.println("- Passphrase: " + passphrase);
 
-  Serial.println();
-  Serial.println("Waiting.");
+    Serial.println("Perform WiFi connection with EEPROM");
+    WiFi.begin(ssid.c_str(), passphrase.c_str());
+    if (testWifi()) {
+        Serial.println("Successfully connected.");
+        welcomeWebServerRegisterRoute();
+        webServer.begin();
+        appSetup();
+        return;
+    }
 
-  while ((WiFi.status() != WL_CONNECTED)) {
-    Serial.print(".");
-    delay(100);
-    server.handleClient();
-  }
+    Serial.println("Turning on the config HotSpot.");
+    configWebServerRegisterRoutes();
+    webServer.begin();
+    configSetupHotSpot();
+    while ((WiFi.status() != WL_CONNECTED)) {
+        delay(100);
+        webServer.handleClient();
+    }
+}
+
+/**
+ * System main loop.
+ */
+void loop(void) {
+    if ((WiFi.status() == WL_CONNECTED)) {
+        appLoop();
+        delay(100);
+        webServer.handleClient();
+    }
 }
 
 /**
  *
  */
-void loop() {
-  if ((WiFi.status() == WL_CONNECTED)) {
-    // Add your program code here which the esp8266 has to perform when it connects to network
-  } else {
-  }
-}
-
-//Functions used for saving WiFi credentials and to connect to it which you do not need to change
 bool testWifi(void) {
-  int c = 0;
-  Serial.println("Waiting for WiFi to connect");
-  while ( c < 20 ) {
-    if (WiFi.status() == WL_CONNECTED)
-    {
-      return true;
+    int c = 0;
+    Serial.println("Waiting for WiFi to connect...");
+    while (c < 20) {
+        if (WiFi.status() == WL_CONNECTED) {
+            return true;
+        }
+        delay(500);
+        Serial.print(".");
+        c++;
     }
-    delay(500);
-    Serial.print("*");
-    c++;
-  }
-  Serial.println("");
-  Serial.println("Connection timed out, opening AP or Hotspot");
-  return false;
+    Serial.println("");
+    Serial.println("Connection timed out.");
+    return false;
 }
 
-void launchWeb() {
-  Serial.println("");
-  if (WiFi.status() == WL_CONNECTED)
-    Serial.println("WiFi connected");
-  Serial.print("Local IP: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("SoftAP IP: ");
-  Serial.println(WiFi.softAPIP());
-  createWebServer();
-  // Start the server
-  server.begin();
-  Serial.println("Server started");
-}
-
-void setupAP(void) {
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(100);
-  int n = WiFi.scanNetworks();
-  Serial.println("Scan completed");
-  if (n == 0) {
-    Serial.println("No WiFi Networks found");
-  } else {
-    Serial.print(n);
-    Serial.println(" Networks found");
-    for (int i = 0; i < n; ++i) {
-      // Print SSID and RSSI for each network found
-      Serial.print(i + 1);
-      Serial.print(": ");
-      Serial.print(WiFi.SSID(i));
-      Serial.print(" (");
-      Serial.print(WiFi.RSSI(i));
-      Serial.print(")");
-      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
-      delay(10);
+/**
+ *
+ */
+void launchWeb(void) {
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("WiFi connected");
     }
-  }
-  Serial.println("");
-  st = "<ol>";
-  for (int i = 0; i < n; ++i)
-  {
-    // Print SSID and RSSI for each network found
-    st += "<li>";
-    st += WiFi.SSID(i);
-    st += " (";
-    st += WiFi.RSSI(i);
-
-    st += ")";
-    st += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
-    st += "</li>";
-  }
-  st += "</ol>";
-  delay(100);
-  WiFi.softAP("ESP-NAME", "");
-  Serial.println("Initializing_Wifi_accesspoint");
-  launchWeb();
-  Serial.println("over");
+    Serial.print("Local IP: ");
+    Serial.println(WiFi.localIP());
+    Serial.print("SoftAP IP: ");
+    Serial.println(WiFi.softAPIP());
+    configWebServerRegisterRoutes();
+    webServer.begin();
+    Serial.println("Server started");
 }
 
-void createWebServer() {
-    server.on("/", []() {
-        IPAddress ip = WiFi.softAPIP();
-        String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-        configHtmlContent = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}</style><body><h1>esp8266-wifi</h1><div id=page></div><script>let d=document;let p=p=>fetch(p).then(async resp=>d.getElementById('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e);}},false);p('login');e('click','login',e=>{console.log('event',e);})</script></body></html>";
-        server.send(200, "text/html", configHtmlContent);
+/**
+ * Setup the HotSpot to access on config area.
+ */
+void configSetupHotSpot(void) {
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    configScanNetworks();
+    delay(100);
+    WiFi.softAP(appTitle + " " + ESP.getChipId(), "");
+    launchWeb();
+}
+
+/**
+ *
+ */
+void configWebServerRegisterRoutes(void) {
+    webServer.on("/", []() {
+        String configIndexHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style></style><body><h1>esp8266-wifi</h1><div id=page></div><script></script></body></html>";
+        webServer.send(200, "text/html", configIndexHtml);
     });
-    server.on("/scan", []() {
-      //setupAP();
-      IPAddress ip = WiFi.softAPIP();
-      String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-
-      content = "<!DOCTYPE HTML>\r\n<html>go back";
-      server.send(200, "text/html", content);
+    webServer.on("/config", []() {
+        webServer.send(200, "text/html", configFormHtml());
     });
-
-    server.on("/setting", []() {
-      String qsid = server.arg("ssid");
-      String qpass = server.arg("pass");
-      if (qsid.length() > 0 && qpass.length() > 0) {
-        Serial.println("clearing eeprom");
-        for (int i = 0; i < 96; ++i) {
-          EEPROM.write(i, 0);
-        }
-        Serial.println(qsid);
-        Serial.println("");
-        Serial.println(qpass);
-        Serial.println("");
-
-        Serial.println("writing eeprom ssid:");
-        for (int i = 0; i < qsid.length(); ++i)
-        {
-          EEPROM.write(i, qsid[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qsid[i]);
-        }
-        Serial.println("writing eeprom pass:");
-        for (int i = 0; i < qpass.length(); ++i)
-        {
-          EEPROM.write(32 + i, qpass[i]);
-          Serial.print("Wrote: ");
-          Serial.println(qpass[i]);
-        }
-        EEPROM.commit();
-
-        content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
-        statusCode = 200;
-        ESP.reset();
-      } else {
-        content = "{\"Error\":\"404 not found\"}";
-        statusCode = 404;
-        Serial.println("Sending 404");
-      }
-      server.sendHeader("Access-Control-Allow-Origin", "*");
-      server.send(statusCode, "application/json", content);
-
+    webServer.on("/scan", []() {
+        configScanNetworks();
+        webServer.send(200, "text/html", configFormHtml());
     });
+    webServer.on("/connect", []() {
+        int statusCode;
+        bool validData = false;
+        String ssid = webServer.arg("ssid");
+        String passphrase = webServer.arg("passphrase");
+        String content;
+        if (ssid.length() > 0 && passphrase.length() > 0) {
+            dataErase(0, 96);
+            dataSaveAsString(0, ssid);
+            dataSaveAsString(32, passphrase);
+            dataCommit();
+            content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
+            statusCode = 200;
+            validData = true;
+        } else {
+            content = "{\"Error\":\"404 not found\"}";
+            statusCode = 404;
+        }
+        webServer.sendHeader("Access-Control-Allow-Origin", "*");
+        webServer.send(statusCode, "application/json", content);
+        if (validData) {
+            delay(500);
+            ESP.reset();
+        }
+    });
+}
+
+/**
+ * Scan networks and prepare the list for the login form.
+ */
+void configScanNetworks(void) {
+    int countNetworks = WiFi.scanNetworks();
+    Serial.println("Networks scan completed.");
+    if (countNetworks == 0) {
+        Serial.println("No WiFi Networks found");
+        configNetworksOptions = "<option value=0>No networks found</option>";
+        configNetworksOptions += "<option value=-1>Scan for networks</option>";
+    } else {
+        Serial.print(countNetworks);
+        Serial.println(" Networks found");
+        configNetworksOptions = "<option value=0>Select a network</option>";
+        for (int i = 0; i < countNetworks; ++i) {
+            // Print SSID and RSSI for each network found
+            Serial.print(i + 1);
+            Serial.print(": ");
+            Serial.print(WiFi.SSID(i));
+            Serial.print(" (");
+            Serial.print(WiFi.RSSI(i));
+            Serial.print(")");
+            Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
+            delay(10);
+            configNetworksOptions += "<option value=\"" + WiFi.SSID(i) + "\">";
+            configNetworksOptions += WiFi.SSID(i);
+            configNetworksOptions += " (";
+            configNetworksOptions += WiFi.RSSI(i);
+            configNetworksOptions += ")";
+            configNetworksOptions += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
+            configNetworksOptions += "</option>";
+        }
+    }
+}
+
+/**
+ *
+ */
+String configFormHtml(void) {
+    String configFormHtml = "<form> SSID <select id=network> "+ configNetworksOptions +" </select> Password <input type=password> <button id=connect type=button>Connect</button></form>";
+    return configFormHtml;
+}
+
+/**
+ *
+ */
+void welcomeWebServerRegisterRoute(void) {
+    webServer.on("/welcome", []() {
+        String welcomeHtml = "<h1>Welcome</h1>";
+        webServer.send(200, "text/html", welcomeHtml);
+    });
+}
+
+/**
+ * Read data from EEPROM.
+ */
+String dataReadAsString(int from, int to) {
+    String data = "";
+    for (int i = from; i < to; ++i) {
+        data += char(EEPROM.read(i));
+    }
+    return data;
+}
+
+/**
+ * Store data on EEPROM.
+ */
+void dataSaveAsString(int offset, String value) {
+    for (int i = 0; i < value.length(); ++i) {
+        EEPROM.write(offset + i, value[i]);
+    }
+}
+
+/**
+ * Erase EEPROM segment.
+ */
+void dataErase(int from, int to) {
+    for (int i = from; i < to; ++i) {
+        EEPROM.write(i, 0);
+    }
+}
+
+/**
+ * Commit data on EEPROM.
+ */
+void dataCommit(void) {
+    EEPROM.commit();
 }

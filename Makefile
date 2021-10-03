@@ -7,13 +7,12 @@ PACKAGE_JSON := http://arduino.esp8266.com/stable/package_esp8266com_index.json
 PORT := /dev/ttyUSB0
 
 install: requirements add-boards-manager install-board
-	@echo "Installed"
 
 requirements: requirements.txt
 	@pip install -r requirements.txt
 
 check-port:
-	@if [ ! -c /dev/ttyUSB0 ]; then echo "Port not ready."; exit 1; fi
+	@if [ ! -c $(PORT) ]; then echo "Port not ready."; exit 1; fi
 
 add-dialout-group:
 	@sudo usermod -a -G dialout francesco
@@ -29,19 +28,36 @@ nodemcu.bin:
 	@curl -sfLo nodemcu.bin https://github.com/nodemcu/nodemcu-firmware/releases/download/0.9.5_20150318/nodemcu_float_0.9.5_20150318.bin
 
 flash: nodemcu.bin
-	@esptool --port /dev/ttyUSB0 write_flash 0x00000 $(CWD)/nodemcu.bin
+	@esptool --port $(PORT) write_flash 0x00000 $(CWD)/nodemcu.bin
 
-inject: export CONFIG_JS_CONTENT = $(shell python3 -m jsmin app/config/index.js | sed 's/"/\\"/g')
-inject: export CONFIG_CSS_CONTENT = $(shell python3 -m csscompressor app/config/config.css | sed 's/"/\\"/g')
-inject: export CONFIG_HTML_CONTENT = $(shell htmlmin -s app/config/config.html | sed 's/"/\\"/g')
+inject: export CONFIG_APP_JS = $(shell python3 -m jsmin app/config/app.js | make -s escape)
+inject: export CONFIG_STYLE_CSS = $(shell python3 -m csscompressor app/config/style.css | make -s escape)
+inject: export CONFIG_INDEX_HTML = $(shell htmlmin -s app/config/index.html | make -s escape)
+inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make -s escape)
+inject: export FRAMEWORK_JS = $(shell python3 -m jsmin app/framework.js | make -s escape)
+inject: export DARK_THEME_CSS = $(shell python3 -m csscompressor app/dark-theme.js | make -s escape)
+inject: export WELCOME_HTML = $(shell htmlmin -s app/welcome.html | make -s escape)
 
 inject:
-	@sed 's/configHtmlContent =.*$$/configHtmlContent = "$$${A}{CONFIG_HTML_CONTENT}";/' main.ino > main.ino.tmp
+	@sed \
+		-e 's/String configIndexHtml =.*$$/String configIndexHtml = "$$${A}{CONFIG_INDEX_HTML}";/g' \
+		-e 's/String configFormHtml =.*$$/String configFormHtml = "$$${A}{CONFIG_FORM_HTML}";/g' \
+		-e 's/String welcomeHtml =.*$$/String welcomeHtml = "$$${A}{WELCOME_HTML}";/g' \
+        main.ino > main.ino.tmp
 	@envsubst < main.ino.tmp | envsubst > main.ino
 	@rm main.ino.tmp
 
-build:
-	mkdir -p $(CWD)/build
+verify: inject
+	@mkdir -p $(CWD)/build/verify
+	@$(ARDUINO) --board esp8266:esp8266:generic --verify main.ino --pref build.path=$(CWD)/build/verify
 
-upload: check-port build
-	$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port /dev/ttyUSB0 --pref build.path=$(CWD)/build/upload
+upload: check-port inject
+	@mkdir -p $(CWD)/build/upload
+	@$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port $(PORT) --pref build.path=$(CWD)/build/upload
+	@make -s monitor
+
+escape:
+	@sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
+
+monitor:
+	@while read -r line < $(PORT); do echo "$${line}"; done
