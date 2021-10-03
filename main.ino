@@ -218,7 +218,7 @@ String configForm(void) {
  */
 void welcomeWebServerRegisterRoute(void) {
     webServer.on("/welcome", []() {
-        String welcomeHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style></style><body><h1>esp8266-wifi</h1><div id=page></div><script></script></body></html>";
+        String welcomeHtml = "<h1>Welcome</h1>";
         webServer.send(200, "text/html", welcomeHtml);
     });
 }
