@@ -59,7 +59,7 @@ void setup(void) {
     WiFi.config(0U, 0U, 0U);
     if (testWifi()) {
         Serial.println("Successfully connected.");
-        if (!MDNS.begin("esp8266")) {
+        if (!MDNS.begin(hostname)) {
             Serial.println("Error setting up MDNS responder!");
         }
         defaultWebServerRegisterRoutes();
