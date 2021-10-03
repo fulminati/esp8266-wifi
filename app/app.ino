@@ -78,6 +78,7 @@ void setup(void) {
     configSetupHotSpot();
     while ((WiFi.status() != WL_CONNECTED)) {
         delay(100);
+        dnsServer.processNextRequest();
         webServer.handleClient();
     }
 }
