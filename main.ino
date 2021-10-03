@@ -3,6 +3,8 @@
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 
+const String appTitle = "ESP8266 WiFi";
+
 String configErrorMessage;
 String configNetworksOptions;
 
@@ -115,7 +117,7 @@ void configSetupHotSpot(void) {
     delay(100);
     configScanNetworks();
     delay(100);
-    WiFi.softAP("ESP8266-WiFi", "");
+    WiFi.softAP(appTitle + " " + ESP.getChipId(), "");
     launchWeb();
 }
 
