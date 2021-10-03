@@ -5,7 +5,7 @@ e('click', 'connect', e => {
     o('show');
     p('connect', 'config').then(() => {
         o('hide');
-        t(5000, () => r('http://<%hostname%>/welcome'));
+        t(15000, () => r('http://<%hostname%>/welcome'));
     });
 });
 

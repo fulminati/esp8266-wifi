@@ -136,7 +136,7 @@ void configSetupHotSpot(void) {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    WiFi.softAP("DNSServer CaptivePortal example");
+    delay(100);
     dnsServer.start(DNS_PORT, "*", apIP);
     delay(100);
     configScanNetworks();
