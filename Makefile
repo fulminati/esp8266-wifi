@@ -60,4 +60,7 @@ escape:
 	@sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
 
 monitor:
-	@while read -r line < $(PORT); do echo "$${line}"; done
+	#@while read -r line && true; do echo "$${line}"; done < $(PORT)
+	#cat $(PORT)
+	#screen $(PORT)
+	while true; do cat < $(PORT); done

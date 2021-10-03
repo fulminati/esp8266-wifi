@@ -25,6 +25,13 @@ void appLoop(void) {
 }
 
 /**
+ * Application runtime loop.
+ */
+void appRoutes(void) {
+    Serial.println("[App] Routes...");
+}
+
+/**
  * System bootstrap.
  */
 void setup(void) {
@@ -46,7 +53,7 @@ void setup(void) {
     WiFi.begin(ssid.c_str(), passphrase.c_str());
     if (testWifi()) {
         Serial.println("Successfully connected.");
-        welcomeWebServerRegisterRoute();
+        defaultWebServerRegisterRoutes();
         webServer.begin();
         appSetup();
         return;
@@ -209,11 +216,17 @@ String configFormHtml(void) {
 /**
  *
  */
-void welcomeWebServerRegisterRoute(void) {
+void defaultWebServerRegisterRoutes(void) {
     webServer.on("/welcome", []() {
         String welcomeHtml = "<h1>Welcome</h1>";
         webServer.send(200, "text/html", welcomeHtml);
     });
+    webServer.on("/reset", []() {
+        dataErase(0, 96);
+        dataCommit();
+        webServer.send(200, "text/html", "<h1>Reset ok!</h1>");
+    });
+    appRoutes();
 }
 
 /**
