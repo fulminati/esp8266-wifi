@@ -5,7 +5,6 @@ e('click', 'connect', e => {
     o('show');
     p('connect', 'config').then(() => {
         o('hide');
-        //setTimeout(()=> {r('welcome')}, 3000)
     });
 });
 

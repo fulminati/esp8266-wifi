@@ -209,7 +209,7 @@ void configScanNetworks(void) {
  *
  */
 String configFormHtml(void) {
-    String configFormHtml = "<form> SSID <select id=network> "+ configNetworksOptions +" </select> Password <input type=password> <button id=connect type=button>Connect</button></form>";
+    String configFormHtml = "<form id=config> SSID <select id=network name=ssid> "+ configNetworksOptions +" </select> Password <input type=password name=passphrase> <button id=connect type=button>Connect</button></form>";
     return configFormHtml;
 }
 
