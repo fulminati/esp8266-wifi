@@ -107,7 +107,7 @@ void launchWeb(void) {
 }
 
 /**
- *
+ * Setup the HotSpot to access on config area.
  */
 void configSetupHotSpot(void) {
     WiFi.mode(WIFI_STA);

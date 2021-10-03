@@ -12,7 +12,7 @@ requirements: requirements.txt
 	@pip install -r requirements.txt
 
 check-port:
-	@if [ ! -c /dev/ttyUSB0 ]; then echo "Port not ready."; exit 1; fi
+	@if [ ! -c $(PORT) ]; then echo "Port not ready."; exit 1; fi
 
 add-dialout-group:
 	@sudo usermod -a -G dialout francesco
@@ -28,7 +28,7 @@ nodemcu.bin:
 	@curl -sfLo nodemcu.bin https://github.com/nodemcu/nodemcu-firmware/releases/download/0.9.5_20150318/nodemcu_float_0.9.5_20150318.bin
 
 flash: nodemcu.bin
-	@esptool --port /dev/ttyUSB0 write_flash 0x00000 $(CWD)/nodemcu.bin
+	@esptool --port $(PORT) write_flash 0x00000 $(CWD)/nodemcu.bin
 
 inject: export CONFIG_APP_JS = $(shell python3 -m jsmin app/config/app.js | make -s escape)
 inject: export CONFIG_STYLE_CSS = $(shell python3 -m csscompressor app/config/style.css | make -s escape)
@@ -51,7 +51,11 @@ verify: inject
 
 upload: check-port inject
 	@mkdir -p $(CWD)/build/upload
-	@$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port /dev/ttyUSB0 --pref build.path=$(CWD)/build/upload
+	@$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port $(PORT) --pref build.path=$(CWD)/build/upload
+	@make -s monitor
 
 escape:
-	sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
+	@sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
+
+monitor:
+	@while read -r line < $(PORT); do echo "$${line}"; done
