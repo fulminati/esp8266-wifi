@@ -37,7 +37,7 @@ inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make
 inject: export FRAMEWORK_JS = $(shell python3 -m jsmin app/framework.js | make -s escape)
 inject: export DARK_THEME_CSS = $(shell python3 -m csscompressor app/dark-theme.css | make -s escape)
 inject: export WELCOME_HTML = $(shell htmlmin -s app/welcome.html | make -s escape)
-inject: export GLOBAL_VARS = appTitle="ESP8266 WiFi"
+inject: export GLOBAL_VARS = appTitle="ESP8266 WiFi";hostname="esp8266.localhost.net"
 
 inject:
 	@sed \

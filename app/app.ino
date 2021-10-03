@@ -5,6 +5,7 @@
 #include <EEPROM.h>
 
 const String appTitle = "ESP8266 WiFi";
+const String hostname = "esp8266.localhost.net";
 
 String configErrorMessage;
 String configNetworksOptions;
@@ -22,7 +23,7 @@ void appSetup(void) {
  * Application runtime loop.
  */
 void appLoop(void) {
-    Serial.println("[App] Loop...");
+    //Serial.println("[App] Loop...");
 }
 
 /**
@@ -41,6 +42,7 @@ void setup(void) {
 
     Serial.println("Disconnecting previously connected WiFi");
     WiFi.disconnect();
+    WiFi.hostname(hostname);
 
     Serial.println("Reading SSID and passphrase from EEPROM");
     EEPROM.begin(512);
@@ -51,6 +53,7 @@ void setup(void) {
     Serial.println("- Passphrase: " + passphrase);
 
     Serial.println("Perform WiFi connection with EEPROM");
+    delay(500);
     WiFi.begin(ssid.c_str(), passphrase.c_str());
     if (testWifi()) {
         Serial.println("Successfully connected.");
@@ -137,7 +140,7 @@ void configSetupHotSpot(void) {
  */
 void configWebServerRegisterRoutes(void) {
     webServer.on("/", []() {
-        String configIndexHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>"+ appTitle +"</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><link rel=\"shortcut icon\" type=image/x-icon href=data:image/x-icon;,><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}#mask{position:fixed;display:none;width:100%;height:100%;text-align:center;padding-top:100px;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.8);z-index:2;cursor:pointer}h1{font-size:30px;text-align:center}</style><body><h1>"+ appTitle +"</h1><div id=page></div><div id=mask></div><script>let d=document;let g=i=>d.getElementById(i);let p=(p,f)=>fetch(p,{method:'POST',body:f?new FormData(g(f)):''}).then(async resp=>g('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e.target);}},false);let o=a=>g('mask').style.display=a=='show'?'block':'none';let r=u=>{window.location.href=u};let t=(t,c)=>setTimeout(c,t);;p('config');e('click','connect',e=>{o('show');p('connect','config').then(()=>{o('hide');t(5000,()=>r('http://esp8266.local/welcome'));});});e('change','network',e=>{if(e.value==-1){o('show');p('scan').then(()=>{o('hide')});}});e('click','test',e=>{o('show');setTimeout(()=>{o('hide')},3000)});</script></body></html>";
+        String configIndexHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>"+ appTitle +"</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><link rel=\"shortcut icon\" type=image/x-icon href=data:image/x-icon;,><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}#mask{position:fixed;display:none;width:100%;height:100%;text-align:center;padding-top:100px;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.8);z-index:2;cursor:pointer}h1{font-size:30px;text-align:center}</style><body><h1>"+ appTitle +"</h1><div id=page></div><div id=mask></div><script>let d=document;let g=i=>d.getElementById(i);let p=(p,f)=>fetch(p,{method:'POST',body:f?new FormData(g(f)):''}).then(async resp=>g('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e.target);}},false);let o=a=>g('mask').style.display=a=='show'?'block':'none';let r=u=>{window.location.href=u};let t=(t,c)=>setTimeout(c,t);;p('config');e('click','connect',e=>{o('show');p('connect','config').then(()=>{o('hide');t(5000,()=>r('http://"+hostname+"/welcome'));});});e('change','network',e=>{if(e.value==-1){o('show');p('scan').then(()=>{o('hide')});}});e('click','test',e=>{o('show');setTimeout(()=>{o('hide')},3000)});</script></body></html>";
         webServer.send(200, "text/html", configIndexHtml);
     });
     webServer.on("/config", []() {
