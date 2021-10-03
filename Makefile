@@ -44,18 +44,18 @@ inject:
 		-e 's/String configIndexHtml =.*$$/String configIndexHtml = "$$${A}{CONFIG_INDEX_HTML}";/g' \
 		-e 's/String configFormHtml =.*$$/String configFormHtml = "$$${A}{CONFIG_FORM_HTML}";/g' \
 		-e 's/String welcomeHtml =.*$$/String welcomeHtml = "$$${A}{WELCOME_HTML}";/g' \
-        main.ino > main.ino.tmp
-	@envsubst < main.ino.tmp | envsubst > main.ino
+        app/app.ino > app/app.ino.tmp
+	@envsubst < app/app.ino.tmp | envsubst > app/app.ino
 	@echo "$${GLOBAL_VARS};print(\"$${CONFIG_INDEX_HTML}\")" | envsubst | python3 > tests/config/index.html
-	@rm main.ino.tmp
+	@rm app/app.ino.tmp
 
 verify: inject
 	@mkdir -p $(CWD)/build/verify
-	@$(ARDUINO) --board esp8266:esp8266:generic --verify main.ino --pref build.path=$(CWD)/build/verify
+	@$(ARDUINO) --board esp8266:esp8266:generic --verify app/app.ino --pref build.path=$(CWD)/build/verify
 
 upload: check-port inject
 	@mkdir -p $(CWD)/build/upload
-	@$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port $(PORT) --pref build.path=$(CWD)/build/upload
+	@$(ARDUINO) --board esp8266:esp8266:generic --upload app/app.ino --port $(PORT) --pref build.path=$(CWD)/build/upload
 	@make -s monitor
 
 escape:

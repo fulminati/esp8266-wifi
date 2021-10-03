@@ -5,7 +5,7 @@ e('click', 'connect', e => {
     o('show');
     p('connect', 'config').then(() => {
         o('hide');
-        t(3000, () => r('welcome'));
+        t(5000, () => r('http://esp8266.local/welcome'));
     });
 });
 
