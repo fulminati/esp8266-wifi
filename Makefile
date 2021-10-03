@@ -7,7 +7,6 @@ PACKAGE_JSON := http://arduino.esp8266.com/stable/package_esp8266com_index.json
 PORT := /dev/ttyUSB0
 
 install: requirements add-boards-manager install-board
-	@echo "Installed"
 
 requirements: requirements.txt
 	@pip install -r requirements.txt
@@ -46,11 +45,13 @@ inject:
 	@envsubst < main.ino.tmp | envsubst > main.ino
 	@rm main.ino.tmp
 
-build:
-	mkdir -p $(CWD)/build
+verify:
+	@mkdir -p $(CWD)/build/verify
+	@$(ARDUINO) --board esp8266:esp8266:generic --verify main.ino --pref build.path=$(CWD)/build/verify
 
 upload: check-port build
-	$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port /dev/ttyUSB0 --pref build.path=$(CWD)/build/upload
+	@mkdir -p $(CWD)/build/upload
+	@$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port /dev/ttyUSB0 --pref build.path=$(CWD)/build/upload
 
 escape:
 	sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'

@@ -40,8 +40,8 @@ void setup(void) {
     Serial.println("Reading SSID and passphrase from EEPROM");
     EEPROM.begin(512);
     delay(10);
-    String ssid = readDataAsString(0, 32);
-    String passphrase = readDataAsString(32, 96);
+    String ssid = dataReadAsString(0, 32);
+    String passphrase = dataReadAsString(32, 96);
     Serial.print("SSID: ");
     Serial.println(ssid);
     Serial.print("PASS: ");
@@ -143,17 +143,17 @@ void configWebServerRegisterRoutes(void) {
     });
     webServer.on("/connect", []() {
         int statusCode;
-        bool validData = false
+        bool validData = false;
         String ssid = webServer.arg("ssid");
         String passphrase = webServer.arg("passphrase");
         String content;
         if (ssid.length() > 0 && passphrase.length() > 0) {
-            dataErase(0, 96)
+            dataErase(0, 96);
             dataSaveAsString(0, ssid);
             dataSaveAsString(32, passphrase);
             dataCommit();
-            webServerResponse = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
-            webServerStatusCode = 200;
+            content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
+            statusCode = 200;
             validData = true;
         } else {
             content = "{\"Error\":\"404 not found\"}";
