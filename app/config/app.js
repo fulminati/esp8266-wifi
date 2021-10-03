@@ -5,6 +5,7 @@ e('click', 'connect', e => {
     o('show');
     p('connect', 'config').then(() => {
         o('hide');
+        t(3000, () => r('welcome'));
     });
 });
 
