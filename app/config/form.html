@@ -1,11 +1,11 @@
-<form>
+<form id="config">
     SSID
-    <select id="network">
+    <select id="network" name="ssid">
         <% configNetworksOptions %>
     </select>
 
     Password
-    <input type="password">
+    <input type="password" name="passphrase">
 
     <button id="connect" type="button">Connect</button>
 </form>
