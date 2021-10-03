@@ -45,11 +45,11 @@ inject:
 	@envsubst < main.ino.tmp | envsubst > main.ino
 	@rm main.ino.tmp
 
-verify:
+verify: inject
 	@mkdir -p $(CWD)/build/verify
 	@$(ARDUINO) --board esp8266:esp8266:generic --verify main.ino --pref build.path=$(CWD)/build/verify
 
-upload: check-port build
+upload: check-port inject
 	@mkdir -p $(CWD)/build/upload
 	@$(ARDUINO) --board esp8266:esp8266:generic --upload wifi.ini --port /dev/ttyUSB0 --pref build.path=$(CWD)/build/upload
 
