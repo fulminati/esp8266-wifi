@@ -35,11 +35,13 @@ inject: export CONFIG_APP_JS = $(shell python3 -m jsmin app/config/app.js | make
 inject: export CONFIG_STYLE_CSS = $(shell python3 -m csscompressor app/config/style.css | make -s escape)
 inject: export CONFIG_INDEX_HTML = $(shell htmlmin -s app/config/index.html | make -s escape)
 inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make -s escape)
+inject: export WELCOME_HTML = $(shell htmlmin -s app/welcome.html | make -s escape)
 
 inject:
 	@sed \
 		-e 's/String configIndexHtml =.*$$/String configIndexHtml = "$$${A}{CONFIG_INDEX_HTML}";/g' \
 		-e 's/String configFormHtml =.*$$/String configFormHtml = "$$${A}{CONFIG_FORM_HTML}";/g' \
+		-e 's/String welcomeHtml =.*$$/String welcomeHtml = "$$${A}{WELCOME_HTML}";/g' \
         main.ino > main.ino.tmp
 	@envsubst < main.ino.tmp | envsubst > main.ino
 	@rm main.ino.tmp

@@ -51,7 +51,7 @@ void setup(void) {
     WiFi.begin(ssid.c_str(), passphrase.c_str());
     if (testWifi()) {
         Serial.println("Successfully connected.");
-        welcomeRegisterRoute();
+        welcomeWebServerRegisterRoute();
         webServer.begin();
         appSetup();
         return;
@@ -211,6 +211,16 @@ void configScanNetworks(void) {
 String configForm(void) {
     String configFormHtml = "<form> SSID <select id=network> "+ configNetworksOptions +" </select> Password <input type=password> <button id=connect type=button>Connect</button></form>";
     return configFormHtml;
+}
+
+/**
+ *
+ */
+void welcomeWebServerRegisterRoute(void) {
+    webServer.on("/welcome", []() {
+        String welcomeHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style></style><body><h1>esp8266-wifi</h1><div id=page></div><script></script></body></html>";
+        webServer.send(200, "text/html", welcomeHtml);
+    });
 }
 
 /**
