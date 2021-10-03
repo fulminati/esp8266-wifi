@@ -45,11 +45,11 @@ void appRoutes(void) {
 void setup(void) {
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
+    WiFi.hostname(hostname);
 
     Serial.println("Disconnecting previously connected WiFi");
     WiFi.disconnect();
     delay(200);
-    WiFi.hostname(hostname);
     delay(300);
 
     Serial.println("Reading SSID and passphrase from EEPROM");
@@ -77,6 +77,7 @@ void setup(void) {
     Serial.println("Turning on the config HotSpot.");
     configWebServerRegisterRoutes();
     webServer.begin();
+    sslServer.begin();
     configSetupHotSpot();
     while ((WiFi.status() != WL_CONNECTED)) {
         delay(100);
@@ -188,7 +189,6 @@ void configWebServerRegisterRoutes(void) {
             ESP.reset();
         }
     });
-
     webServer.onNotFound([]() {
         webServer.sendHeader("Location", "http://"+hostname+"/", true);
         webServer.send(302, "text/plane","");
