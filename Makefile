@@ -35,7 +35,7 @@ inject: export CONFIG_STYLE_CSS = $(shell python3 -m csscompressor app/config/st
 inject: export CONFIG_INDEX_HTML = $(shell htmlmin -s app/config/index.html | make -s escape)
 inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make -s escape)
 inject: export FRAMEWORK_JS = $(shell python3 -m jsmin app/framework.js | make -s escape)
-inject: export DARK_THEME_CSS = $(shell python3 -m csscompressor app/dark-theme.js | make -s escape)
+inject: export DARK_THEME_CSS = $(shell python3 -m csscompressor app/dark-theme.css | make -s escape)
 inject: export WELCOME_HTML = $(shell htmlmin -s app/welcome.html | make -s escape)
 
 inject:
