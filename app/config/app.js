@@ -3,9 +3,9 @@ p('config')
 
 e('click', 'connect', e => {
     o('show')
-    p('connect').then(() => {
+    p('connect', 'config').then(() => {
         o('hide')
-        setTimeout(()=> {r('welcome')}, 3000)
+        //setTimeout(()=> {r('welcome')}, 3000)
     });
 })
 

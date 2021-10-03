@@ -131,8 +131,6 @@ void configSetupHotSpot(void) {
  */
 void configWebServerRegisterRoutes(void) {
     webServer.on("/", []() {
-        IPAddress ip = WiFi.softAPIP();
-        String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
         String configIndexHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style></style><body><h1>esp8266-wifi</h1><div id=page></div><script></script></body></html>";
         webServer.send(200, "text/html", configIndexHtml);
     });
