@@ -42,7 +42,9 @@ void setup(void) {
 
     Serial.println("Disconnecting previously connected WiFi");
     WiFi.disconnect();
+    delay(200);
     WiFi.hostname(hostname);
+    delay(300);
 
     Serial.println("Reading SSID and passphrase from EEPROM");
     EEPROM.begin(512);
@@ -53,8 +55,8 @@ void setup(void) {
     Serial.println("- Passphrase: " + passphrase);
 
     Serial.println("Perform WiFi connection with EEPROM");
-    delay(500);
     WiFi.begin(ssid.c_str(), passphrase.c_str());
+    WiFi.config(0U, 0U, 0U);
     if (testWifi()) {
         Serial.println("Successfully connected.");
         if (!MDNS.begin("esp8266")) {
