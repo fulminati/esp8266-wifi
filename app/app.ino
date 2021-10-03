@@ -45,6 +45,8 @@ void appRoutes(void) {
 void setup(void) {
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
+    uint8_t mac[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+    bool a = wifi_set_macaddr(STATION_IF, &mac[0]);
     WiFi.hostname(hostname);
 
     Serial.println("Disconnecting previously connected WiFi");
