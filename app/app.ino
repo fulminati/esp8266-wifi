@@ -2,10 +2,14 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <DNSServer.h>
 #include <EEPROM.h>
 
 const String appTitle = "ESP8266 WiFi";
 const String hostname = "esp8266.localhost.net";
+const byte DNS_PORT = 53;
+IPAddress apIP(172, 217, 28, 1);
+DNSServer dnsServer;
 
 String configErrorMessage;
 String configNetworksOptions;
@@ -130,6 +134,9 @@ void launchWeb(void) {
 void configSetupHotSpot(void) {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    WiFi.softAP("DNSServer CaptivePortal example");
+    dnsServer.start(DNS_PORT, "*", apIP);
     delay(100);
     configScanNetworks();
     delay(100);
