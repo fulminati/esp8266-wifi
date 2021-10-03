@@ -11,7 +11,7 @@ e('click', 'connect', e => {
 e('change', 'network', e => {
     if (e.value == -1) {
         o('show')
-        p('connect').then(() => {
+        p('scan').then(() => {
             o('hide')
         });
     }

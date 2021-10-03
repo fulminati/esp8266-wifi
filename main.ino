@@ -129,7 +129,7 @@ void configWebServerRegisterRoutes(void) {
     webServer.on("/", []() {
         IPAddress ip = WiFi.softAPIP();
         String ipStr = String(ip[0]) + '.' + String(ip[1]) + '.' + String(ip[2]) + '.' + String(ip[3]);
-        String configIndexHtml = "<!DOCTYPE html><html lang=en><meta charset=UTF-8><title>Page Title</title><meta name=viewport content=\"width=device-width,initial-scale=1\"><style>*{background:#222;border:0;color:#fff;font:18px monospace}html{margin:0 auto;max-width:480px}input,input:focus,select,select:focus,button,button:focus,textarea,textarea:focus{outline:0;width:100%;background:#000;padding:8px;margin:0 0 16px 0;box-sizing:border-box;cursor:pointer}</style><body><h1>esp8266-wifi</h1><div id=page></div><script>let d=document;let p=p=>fetch(p).then(async resp=>d.getElementById('page').innerHTML=await resp.text());let e=(t,i,c)=>d.addEventListener(t,(e)=>{if(e.target.id==i){e.preventDefault();c(e);}},false);p('login');e('click','login',e=>{console.log('event',e);})</script></body></html>";
+        String configIndexHtml = "";
         webServer.send(200, "text/html", configIndexHtml);
     });
     webServer.on("/config", []() {

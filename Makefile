@@ -31,12 +31,16 @@ nodemcu.bin:
 flash: nodemcu.bin
 	@esptool --port /dev/ttyUSB0 write_flash 0x00000 $(CWD)/nodemcu.bin
 
-inject: export CONFIG_JS_CONTENT = $(shell python3 -m jsmin app/config/index.js | make -s escape)
-inject: export CONFIG_CSS_CONTENT = $(shell python3 -m csscompressor app/config/config.css | make -s escape)
-inject: export CONFIG_HTML_CONTENT = $(shell htmlmin -s app/config/config.html | make -s escape)
+inject: export CONFIG_APP_JS = $(shell python3 -m jsmin app/config/app.js | make -s escape)
+inject: export CONFIG_STYLE_CSS = $(shell python3 -m csscompressor app/config/style.css | make -s escape)
+inject: export CONFIG_INDEX_HTML = $(shell htmlmin -s app/config/index.html | make -s escape)
+inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make -s escape)
 
 inject:
-	@sed 's/configHtmlContent =.*$$/configHtmlContent = "$$${A}{CONFIG_HTML_CONTENT}";/' main.ino > main.ino.tmp
+	@sed \
+		-e 's/String configIndexHtml =.*$$/String configIndexHtml = "$$${A}{CONFIG_INDEX_HTML}";/' \
+		-e 's/String configFormHtml =.*$$/String configFormHtml = "$$${A}{CONFIG_FORM_HTML}";/' \
+        main.ino > main.ino.tmp
 	@envsubst < main.ino.tmp | envsubst > main.ino
 	@rm main.ino.tmp
 
