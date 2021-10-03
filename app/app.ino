@@ -185,6 +185,10 @@ void configWebServerRegisterRoutes(void) {
             ESP.reset();
         }
     });
+    server.onNotFound([]() {
+        server.sendHeader("Location", "/", true);
+        server.send(302, "text/plane","");
+    });
 }
 
 /**
