@@ -38,8 +38,8 @@ inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make
 
 inject:
 	@sed \
-		-e 's/String configIndexHtml =.*$$/String configIndexHtml = "$$${A}{CONFIG_INDEX_HTML}";/' \
-		-e 's/String configFormHtml =.*$$/String configFormHtml = "$$${A}{CONFIG_FORM_HTML}";/' \
+		-e 's/String configIndexHtml =.*$$/String configIndexHtml = "$$${A}{CONFIG_INDEX_HTML}";/g' \
+		-e 's/String configFormHtml =.*$$/String configFormHtml = "$$${A}{CONFIG_FORM_HTML}";/g' \
         main.ino > main.ino.tmp
 	@envsubst < main.ino.tmp | envsubst > main.ino
 	@rm main.ino.tmp

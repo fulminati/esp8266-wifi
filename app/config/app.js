@@ -5,6 +5,7 @@ e('click', 'connect', e => {
     o('show')
     p('connect').then(() => {
         o('hide')
+
     });
 })
 
