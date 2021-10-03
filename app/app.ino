@@ -188,6 +188,7 @@ void configWebServerRegisterRoutes(void) {
             ESP.reset();
         }
     });
+
     webServer.onNotFound([]() {
         webServer.sendHeader("Location", "http://"+hostname+"/", true);
         webServer.send(302, "text/plane","");
