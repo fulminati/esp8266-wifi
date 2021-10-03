@@ -3,13 +3,8 @@
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 
-int statusCode;
+String configErrorMessage;
 String configNetworksOptions;
-String content;
-
-bool testWifi(void);
-void launchWeb(void);
-void setupAP(void);
 
 ESP8266WebServer webServer(80);
 
@@ -42,10 +37,8 @@ void setup(void) {
     delay(10);
     String ssid = dataReadAsString(0, 32);
     String passphrase = dataReadAsString(32, 96);
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-    Serial.print("PASS: ");
-    Serial.println(passphrase);
+    Serial.println("- SSID: " + ssid);
+    Serial.println("- Passphrase: " + passphrase);
 
     Serial.println("Perform WiFi connection with EEPROM");
     WiFi.begin(ssid.c_str(), passphrase.c_str());
