@@ -135,11 +135,11 @@ void configWebServerRegisterRoutes(void) {
         webServer.send(200, "text/html", configIndexHtml);
     });
     webServer.on("/config", []() {
-        webServer.send(200, "text/html", configFrom());
+        webServer.send(200, "text/html", configFormHtml());
     });
     webServer.on("/scan", []() {
         configScanNetworks();
-        webServer.send(200, "text/html", configFrom());
+        webServer.send(200, "text/html", configFormHtml());
     });
     webServer.on("/connect", []() {
         int statusCode;
@@ -192,13 +192,13 @@ void configScanNetworks(void) {
             Serial.print(")");
             Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
             delay(10);
-            st += "<option value=\"" + WiFi.SSID(i) + "\">";
-            st += WiFi.SSID(i);
-            st += " (";
-            st += WiFi.RSSI(i);
-            st += ")";
-            st += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
-            st += "</option>";
+            configNetworksOptions += "<option value=\"" + WiFi.SSID(i) + "\">";
+            configNetworksOptions += WiFi.SSID(i);
+            configNetworksOptions += " (";
+            configNetworksOptions += WiFi.RSSI(i);
+            configNetworksOptions += ")";
+            configNetworksOptions += (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*";
+            configNetworksOptions += "</option>";
         }
     }
 }
@@ -206,7 +206,7 @@ void configScanNetworks(void) {
 /**
  *
  */
-String configForm(void) {
+String configFormHtml(void) {
     String configFormHtml = "<form> SSID <select id=network> "+ configNetworksOptions +" </select> Password <input type=password> <button id=connect type=button>Connect</button></form>";
     return configFormHtml;
 }
