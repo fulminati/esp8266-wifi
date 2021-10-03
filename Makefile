@@ -37,6 +37,7 @@ inject: export CONFIG_FORM_HTML = $(shell htmlmin -s app/config/form.html | make
 inject: export FRAMEWORK_JS = $(shell python3 -m jsmin app/framework.js | make -s escape)
 inject: export DARK_THEME_CSS = $(shell python3 -m csscompressor app/dark-theme.css | make -s escape)
 inject: export WELCOME_HTML = $(shell htmlmin -s app/welcome.html | make -s escape)
+inject: export GLOBAL_VARS = appTitle="Hello"
 
 inject:
 	@sed \
@@ -45,6 +46,7 @@ inject:
 		-e 's/String welcomeHtml =.*$$/String welcomeHtml = "$$${A}{WELCOME_HTML}";/g' \
         main.ino > main.ino.tmp
 	@envsubst < main.ino.tmp | envsubst > main.ino
+	@echo "$${GLOBAL_VARS};print(\"$${CONFIG_INDEX_HTML}\")" | envsubst | python3 > tests/config/index.html
 	@rm main.ino.tmp
 
 verify: inject
