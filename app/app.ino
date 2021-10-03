@@ -253,8 +253,8 @@ void defaultWebServerRegisterRoutes(void) {
     webServer.on("/reset", []() {
         dataErase(0, 96);
         dataCommit();
-        ESP.reset();
         webServer.send(200, "text/html", "<h1>Reset ok!</h1>");
+        ESP.reset();
     });
     appRoutes();
 }
