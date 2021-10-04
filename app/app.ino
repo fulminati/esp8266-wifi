@@ -184,7 +184,7 @@ void discoverServerStart(void) {
         discoverServer.send(200, "application/json", discoverInfo);
     });
     discoverServer.onNotFound([]() {
-        discoverServer.send(403, "text/plane", "<h1>Forbidden</h1>");
+        discoverServer.send(403, "text/html", "<h1>Forbidden</h1>");
     });
     discoverServer.begin();
 }
