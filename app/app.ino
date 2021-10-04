@@ -233,6 +233,7 @@ void defaultWebServerRegisterRoutes(void) {
         dataErase(0, 96);
         dataCommit();
         webServer.send(200, "text/html", "<h1>Reset ok!</h1>");
+        delay(500);
         ESP.reset();
     });
     webServer.onNotFound([]() {
@@ -243,9 +244,9 @@ void defaultWebServerRegisterRoutes(void) {
 }
 
 /**
- *
+ * Get IP address assigned by DHCP to the device.
  */
-String getClientIpAddress() {
+String getClientIpAddress(void) {
     IPAddress ipAddress = WiFi.localIP();
     return String(ipAddress[0]) + '.' + String(ipAddress[1]) + '.' + String(ipAddress[2]) + '.' + String(ipAddress[3]);
 }
