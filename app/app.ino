@@ -1,22 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266WebServerSecure.h>
-#include <ESP8266mDNS.h>
-#include <DNSServer.h>
 #include <EEPROM.h>
 
 const String appTitle = "ESP8266 WiFi";
-const String hostname = "esp8266.localhost.net";
-const byte DNS_PORT = 53;
-IPAddress apIP(172, 217, 28, 1);
-DNSServer dnsServer;
+const String hostname = "esp8266.local.cloud";
+const IPAddress apIP(172, 217, 28, 1);
 
 String configErrorMessage;
 String configNetworksOptions;
 
 ESP8266WebServer webServer(80);
-BearSSL::ESP8266WebServerSecure sslServer(443);
 
 /**
  * Application bootstrap.
