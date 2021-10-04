@@ -10,6 +10,7 @@ String configErrorMessage;
 String configNetworksOptions;
 
 ESP8266WebServer webServer(80);
+ESP8266WebServer discoverServer(64138);
 IPAddress configHotSpotIpAddress(192, 168, 24, 1);
 IPAddress configHotSpotNetmask(255, 255, 255, 0);
 
@@ -59,6 +60,7 @@ void setup(void) {
         WiFi.begin(ssid.c_str(), passphrase.c_str());
         if (testWifi()) {
         Serial.println("Successfully connected.");
+        discoverServerStart();
         defaultWebServerRegisterRoutes();
         webServer.begin();
         appSetup();
@@ -66,12 +68,14 @@ void setup(void) {
     }
 
     Serial.println("Turning on the config HotSpot.");
+    discoverServerStart();
     configWebServerRegisterRoutes();
     webServer.begin();
     configHotSpotSetup();
     while ((WiFi.status() != WL_CONNECTED)) {
         delay(100);
         webServer.handleClient();
+        discoverServer.handleClient();
     }
 }
 
@@ -83,6 +87,7 @@ void loop(void) {
         appLoop();
         delay(100);
         webServer.handleClient();
+        discoverServer.handleClient();
     }
 }
 
@@ -166,16 +171,22 @@ void configWebServerRegisterRoutes(void) {
             ESP.reset();
         }
     });
-    webServer.on("/_discover", []() {
+}
+
+/**
+ *
+ */
+void discoverServerStart(void) {
+    discoverServer.on("/_discover", []() {
         String discover = "{\"name\":\"" + appTitle + "\"}";
         webServer.sendHeader("Access-Control-Allow-Origin", "*");
         webServer.sendHeader("Access-Control-Allow-Methods", "*");
         webServer.send(200, "application/json", discover);
     });
-    webServer.onNotFound([]() {
-        webServer.sendHeader("Location", "/", true);
-        webServer.send(302, "text/plane", "");
+    discoverServer.onNotFound([]() {
+        webServer.send(403, "text/plane", "<h1>Forbidden</h1>");
     });
+    discoverServer.begin();
 }
 
 /**
