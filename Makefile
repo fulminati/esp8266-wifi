@@ -5,6 +5,7 @@ PREFERENCES := ${HOME}/.arduino15/preferences.txt
 BM_PREF := boardsmanager.additional.urls
 PACKAGE_JSON := http://arduino.esp8266.com/stable/package_esp8266com_index.json
 PORT := /dev/ttyUSB0
+BAUD := 115200
 
 install: requirements add-boards-manager install-board
 
@@ -56,13 +57,10 @@ verify: inject
 upload: check-port inject
 	@mkdir -p $(CWD)/build/upload
 	@$(ARDUINO) --board esp8266:esp8266:generic --upload app/app.ino --port $(PORT) --pref build.path=$(CWD)/build/upload
-	@make -s monitor
+	@sleep 5 && make -s monitor
 
 escape:
 	@sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
 
-monitor:
-	#@while read -r line && true; do echo "$${line}"; done < $(PORT)
-	#cat $(PORT)
-	#screen $(PORT)
-	while true; do cat < $(PORT); done
+monitor: check-port
+	@miniterm $(PORT) $(BAUD)

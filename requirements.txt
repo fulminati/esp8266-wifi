@@ -2,3 +2,4 @@ esptool
 jsmin
 csscompressor
 htmlmin
+pyserial

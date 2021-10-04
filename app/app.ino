@@ -9,8 +9,9 @@ const String hostname = "esp8266.local.cloud";
 String configErrorMessage;
 String configNetworksOptions;
 
-const ESP8266WebServer webServer(80);
-const IPAddress apIP(192, 168, 24, 1);
+ESP8266WebServer webServer(80);
+IPAddress configHotSpotIpAddress(192, 168, 24, 1);
+IPAddress configHotSpotNetmask(255, 255, 255, 0);
 
 /**
  * Application bootstrap.
@@ -39,14 +40,12 @@ void appRoutes(void) {
 void setup(void) {
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
-    uint8_t mac[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
-    bool a = wifi_set_macaddr(STATION_IF, &mac[0]);
     WiFi.hostname(hostname);
-    delay(200);
+    delay(100);
 
     Serial.println("Disconnecting previously connected WiFi");
     WiFi.disconnect();
-    delay(300);
+    delay(200);
 
     Serial.println("Reading SSID and passphrase from EEPROM");
     EEPROM.begin(512);
@@ -58,12 +57,8 @@ void setup(void) {
 
     Serial.println("Perform WiFi connection with EEPROM");
     WiFi.begin(ssid.c_str(), passphrase.c_str());
-    WiFi.config(0U, 0U, 0U);
     if (testWifi()) {
         Serial.println("Successfully connected.");
-        if (!MDNS.begin(hostname)) {
-            Serial.println("Error setting up MDNS responder!");
-        }
         defaultWebServerRegisterRoutes();
         webServer.begin();
         appSetup();
@@ -73,12 +68,9 @@ void setup(void) {
     Serial.println("Turning on the config HotSpot.");
     configWebServerRegisterRoutes();
     webServer.begin();
-    sslServer.begin();
-    configSetupHotSpot();
+    configHotSpotSetup();
     while ((WiFi.status() != WL_CONNECTED)) {
         delay(100);
-        dnsServer.processNextRequest();
-        sslServer.handleClient();
         webServer.handleClient();
     }
 }
@@ -95,7 +87,7 @@ void loop(void) {
 }
 
 /**
- *
+ * Test WiFi status for connection.
  */
 bool testWifi(void) {
     int c = 0;
@@ -114,35 +106,17 @@ bool testWifi(void) {
 }
 
 /**
- *
- */
-void launchWeb(void) {
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("WiFi connected");
-    }
-    Serial.print("Local IP: ");
-    Serial.println(WiFi.localIP());
-    Serial.print("SoftAP IP: ");
-    Serial.println(WiFi.softAPIP());
-    configWebServerRegisterRoutes();
-    webServer.begin();
-    Serial.println("Server started");
-}
-
-/**
  * Setup the HotSpot to access on config area.
  */
-void configSetupHotSpot(void) {
-    WiFi.mode(WIFI_STA);
+void configHotSpotSetup(void) {
     WiFi.disconnect();
-    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     delay(100);
-    dnsServer.start(DNS_PORT, "*", apIP);
+    WiFi.mode(WIFI_STA);
+    WiFi.softAP(appTitle + " " + ESP.getChipId(), "");
+    WiFi.softAPConfig(configHotSpotIpAddress, configHotSpotIpAddress, configHotSpotNetmask);
     delay(100);
     configScanNetworks();
     delay(100);
-    WiFi.softAP(appTitle + " " + ESP.getChipId(), "");
-    launchWeb();
 }
 
 /**
@@ -178,20 +152,21 @@ void configWebServerRegisterRoutes(void) {
             content = "{\"Error\":\"404 not found\"}";
             statusCode = 404;
         }
-        webServer.sendHeader("Access-Control-Allow-Origin", "*");
         webServer.send(statusCode, "application/json", content);
         if (validData) {
             delay(500);
             ESP.reset();
         }
     });
-    webServer.onNotFound([]() {
-        webServer.sendHeader("Location", "http://"+hostname+"/", true);
-        webServer.send(302, "text/plane","");
+    webServer.on("/_discover", []() {
+        String discover = "{\"name\":\"" + appTitle + "\"}";
+        webServer.sendHeader("Access-Control-Allow-Origin", "*");
+        webServer.sendHeader("Access-Control-Allow-Methods", "*");
+        webServer.send(200, "application/json", discover);
     });
-    sslServer.onNotFound([]() {
-        sslServer.sendHeader("Location", "http://"+hostname+"/", true);
-        sslServer.send(302, "text/plane","");
+    webServer.onNotFound([]() {
+        webServer.sendHeader("Location", "/", true);
+        webServer.send(302, "text/plane", "");
     });
 }
 
