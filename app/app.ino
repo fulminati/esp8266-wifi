@@ -178,13 +178,13 @@ void configWebServerRegisterRoutes(void) {
  */
 void discoverServerStart(void) {
     discoverServer.on("/_discover", []() {
-        String discover = "{\"name\":\"" + appTitle + "\"}";
-        webServer.sendHeader("Access-Control-Allow-Origin", "*");
-        webServer.sendHeader("Access-Control-Allow-Methods", "*");
-        webServer.send(200, "application/json", discover);
+        String discoverInfo = "{\"name\":\"" + appTitle + "\"}";
+        discoverServer.sendHeader("Access-Control-Allow-Origin", "*");
+        discoverServer.sendHeader("Access-Control-Allow-Methods", "*");
+        discoverServer.send(200, "application/json", discoverInfo);
     });
     discoverServer.onNotFound([]() {
-        webServer.send(403, "text/plane", "<h1>Forbidden</h1>");
+        discoverServer.send(403, "text/plane", "<h1>Forbidden</h1>");
     });
     discoverServer.begin();
 }
