@@ -1,22 +1,16 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266WebServerSecure.h>
-#include <ESP8266mDNS.h>
-#include <DNSServer.h>
 #include <EEPROM.h>
 
 const String appTitle = "ESP8266 WiFi";
-const String hostname = "esp8266.localhost.net";
-const byte DNS_PORT = 53;
-IPAddress apIP(172, 217, 28, 1);
-DNSServer dnsServer;
+const String hostname = "esp8266.local.cloud";
+const IPAddress apIP(172, 217, 28, 1);
 
 String configErrorMessage;
 String configNetworksOptions;
 
 ESP8266WebServer webServer(80);
-BearSSL::ESP8266WebServerSecure sslServer(443);
 
 /**
  * Application bootstrap.
@@ -48,10 +42,10 @@ void setup(void) {
     uint8_t mac[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
     bool a = wifi_set_macaddr(STATION_IF, &mac[0]);
     WiFi.hostname(hostname);
+    delay(200);
 
     Serial.println("Disconnecting previously connected WiFi");
     WiFi.disconnect();
-    delay(200);
     delay(300);
 
     Serial.println("Reading SSID and passphrase from EEPROM");
