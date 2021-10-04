@@ -5,12 +5,12 @@
 
 const String appTitle = "ESP8266 WiFi";
 const String hostname = "esp8266.local.cloud";
-const IPAddress apIP(172, 217, 28, 1);
 
 String configErrorMessage;
 String configNetworksOptions;
 
-ESP8266WebServer webServer(80);
+const ESP8266WebServer webServer(80);
+const IPAddress apIP(192, 168, 24, 1);
 
 /**
  * Application bootstrap.
