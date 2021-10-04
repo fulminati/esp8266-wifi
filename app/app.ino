@@ -56,8 +56,8 @@ void setup(void) {
     Serial.println("- Passphrase: " + passphrase);
 
     Serial.println("Perform WiFi connection with EEPROM");
-    WiFi.begin(ssid.c_str(), passphrase.c_str());
-    if (testWifi()) {
+        WiFi.begin(ssid.c_str(), passphrase.c_str());
+        if (testWifi()) {
         Serial.println("Successfully connected.");
         defaultWebServerRegisterRoutes();
         webServer.begin();
@@ -109,7 +109,7 @@ bool testWifi(void) {
  * Setup the HotSpot to access on config area.
  */
 void configHotSpotSetup(void) {
-    WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_AP_STA);
     WiFi.disconnect();
     delay(100);
     WiFi.softAPConfig(configHotSpotIpAddress, configHotSpotIpAddress, configHotSpotNetmask);
@@ -146,9 +146,16 @@ void configWebServerRegisterRoutes(void) {
             dataSaveAsString(0, ssid);
             dataSaveAsString(32, passphrase);
             dataCommit();
-            content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}";
-            statusCode = 200;
-            validData = true;
+            WiFi.begin(ssid.c_str(), passphrase.c_str());
+            if (testWifi()) {
+                String clientIpAddress = getClientIpAddress();
+                content = "{\"Success\":\"saved to eeprom... reset to boot into new wifi\"}" + clientIpAddress;
+                statusCode = 200;
+                validData = true;
+            } else {
+                content = "{\"Error\":\"404 not found\"}";
+                statusCode = 404;
+            }
         } else {
             content = "{\"Error\":\"404 not found\"}";
             statusCode = 404;
@@ -229,6 +236,14 @@ void defaultWebServerRegisterRoutes(void) {
         ESP.reset();
     });
     appRoutes();
+}
+
+/**
+ *
+ */
+String getClientIpAddress() {
+    IPAddress ipAddress = WiFi.localIP();
+    return String(ipAddress[0]) + '.' + String(ipAddress[1]) + '.' + String(ipAddress[2]) + '.' + String(ipAddress[3]);
 }
 
 /**
