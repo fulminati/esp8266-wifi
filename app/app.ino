@@ -235,6 +235,10 @@ void defaultWebServerRegisterRoutes(void) {
         webServer.send(200, "text/html", "<h1>Reset ok!</h1>");
         ESP.reset();
     });
+    webServer.onNotFound([]() {
+        webServer.sendHeader("Location", "/welcome", true);
+        webServer.send(302, "text/plane", "");
+    });
     appRoutes();
 }
 
