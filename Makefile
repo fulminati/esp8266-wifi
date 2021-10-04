@@ -57,7 +57,7 @@ verify: inject
 upload: check-port inject
 	@mkdir -p $(CWD)/build/upload
 	@$(ARDUINO) --board esp8266:esp8266:generic --upload app/app.ino --port $(PORT) --pref build.path=$(CWD)/build/upload
-	@sleep 5 && make -s monitor
+	@sleep 15 && make -s monitor
 
 escape:
 	@sed -e 's/"/\\"/g' -e 's/<%/"+/g' -e 's/%>/+"/g'
